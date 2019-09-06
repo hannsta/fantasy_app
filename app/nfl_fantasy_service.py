@@ -36,6 +36,7 @@ class NFLFantasyService(object):
                                 position = player['position'],
                                 team = player['teamAbbr'], 
                                 week = week, 
+                                season = season,
                                 player_stat_id =  player_stat_id)
             player_data.append(player_row)
             for stat_id, stat_value in player['stats'].items():

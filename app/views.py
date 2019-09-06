@@ -2,6 +2,7 @@
 Definition of views.
 """
 import urllib3
+import json
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.http import HttpResponseRedirect
@@ -15,8 +16,9 @@ from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import user_logged_in
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect
+from django.core import serializers
 from django.contrib.auth.decorators import login_required
-from .models import User, CampAccess, Player, PlayerStat, StatDefinition
+from .models import User, CampAccess, Player, PlayerStat, StatDefinition, UserTeamPlayer
 from django.core.files.temp import NamedTemporaryFile
 from app.forms import UserCreationForm, BootstrapAuthenticationForm
 from django.conf import settings
@@ -264,3 +266,36 @@ def getStatDefinitions(request):
     content = "Save Successful"
     response = HttpResponse(content, content_type='text/plain')
     return response
+
+def addPlayer(request):
+    player_id = request.GET.get('player_id')
+    email = request.user.email
+    user_player = UserTeamPlayer(user_id = email, player_id = player_id)
+    user_player.save()
+    response = HttpResponse("Success", content_type='text/plain')
+    return response
+
+def removePlayer(request):
+    player_id = request.GET.get('player_id')
+    email = request.user.email
+    UserTeamPlayer.objects.filter(user_id = email, player_id = player_id).delete()
+    response = HttpResponse(content, content_type='text/plain')
+    return response
+
+def getPlayers(request):
+    email = request.user.email
+    players = UserTeamPlayer.objects.filter(user_id = email).values('player_id','name','position','team')
+    data = json.dumps(list(players))
+    return HttpResponse(data, content_type='application/json')
+
+def getPlayer(request):
+    player_id = request.GET.get('player_id')
+    email = request.user.email
+    players = UserTeamPlayer.objects.filter(user_id = email).values('player_id')
+    data = json.dumps(list(players))
+    return HttpResponse(data, content_type='application/json')
+
+def getAllPlayers(request):
+    players = Player.objects.filter(season=2019).values('player_id','name','position','team')
+    data = json.dumps(list(players))
+    return HttpResponse(data, content_type='application/json')

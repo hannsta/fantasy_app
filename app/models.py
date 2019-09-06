@@ -17,8 +17,9 @@ class Player(models.Model):
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
     team = models.CharField(max_length=100)
-    week = models.CharField(max_length=100)
     player_stat_id = models.IntegerField()
+    season = models.IntegerField()
+    week = models.IntegerField()
 
 
 class PlayerStat(models.Model):
@@ -29,6 +30,12 @@ class PlayerStat(models.Model):
 class StatDefinition(models.Model):
     stat_id = models.IntegerField()
     stat_name = models.CharField(max_length=100)
+
+class UserTeamPlayer(models.Model):
+    user_id = models.EmailField(
+        max_length=255,
+    )
+    player_id = models.IntegerField()
 
 class MyUserManager(BaseUserManager):
     def create_user(self, email, role, teams, password=None):

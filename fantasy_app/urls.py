@@ -33,8 +33,17 @@ urlpatterns = [
     url(r'^JsAPI$', app.views.js_call, name='JsAPI'),
     url(r'^admin', app.views.admin, name='admin'),
     url(r'^logout$', app.views.logout, name='logout'),
-    url(r'^getWeekData$', app.views.getWeekData, name='getWeekData'),  
-    url(r'^getStatDefinitions$', app.views.getStatDefinitions, name='getStatDefinitions'),    
+   
     url(r'^\.well-known/acme-challenge/(?P<acme_data>.+)$', app.views.detail, name='detail'),
     url(r'^static/(?P<path>.*)$', django.views.static.serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+    
+    #Data scrape
+    url(r'^getWeekData$', app.views.getWeekData, name='getWeekData'),  
+    url(r'^getStatDefinitions$', app.views.getStatDefinitions, name='getStatDefinitions'),
+
+    #Fantasy REST Endpoints
+    url(r'^addPlayer$', app.views.addPlayer, name='addPlayer'),  
+    url(r'^removePlayer$', app.views.removePlayer, name='removePlayer'), 
+    url(r'^getPlayers$', app.views.getPlayers, name='getPlayers'),  
+    url(r'^getAllPlayers$', app.views.getAllPlayers, name='getAllPlayers'), 
 ]
