@@ -1,0 +1,166 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<form action="/add_user" method="post">
+	{% csrf_token %}
+    <div class="row">
+        <div class="col">
+           <h5>Yellowfin User Management</h5>
+           <p>Yellowfin is primarily based around the concept of user replication. 
+           The user base within Yellowfin should mimic the current identity provider, 
+           and Yellowfin provides several administrative web-service calls to make the automation of this possible. 
+           </p>
+           <p>
+               In this case we are syncing the user creation process between the primary Ski Manager Application and the Yellowfin instance underlying it.
+               However in practice, it is often more benificial to sync users on the login process. So as a user logs into the application you first check if the user currnetly exists in Yellowfin, and if not, create the user at that time.
+           </p>
+        </div>
+    </div>
+    <div class="row">
+		<div class="col formcol">
+            <div class="form-group">
+                <label for="inputEmail1">Email</label>
+                {{form.email}}
+			</div>
+			<div class="form-group">
+				<label for="inputPassword">Password</label>
+                {{form.password}}
+			</div>
+			<div class="form-group">
+                {% if user.role == 'ADMIN' %}
+				    <button type="submit" class="btn btn-primary">Submit</button>
+                {% endif %}
+			</div>
+		</div>
+		<div class="col formcol">
+			<div class="form-group">
+			<label for="exampleInputPassword1">User Role</label>
+                {{form.role}}
+			</div>
+			<div class="form-group">
+            <label for="exampleInputPassword1">Camp Access</label>
+                {{form.camps}}
+		    </div>
+	    </div>
+            {{ form.errors }}
+            {{ form.non_field_errors }}
+	</div>
+    <div class="row">
+       <div class="col">
+           <h5>Create Ski Manager User</h5>
+           <p>The Ski Manager application runs on top of a MySQL database where all information needed for the application to run is stored.
+           In this simplfied setup, this database also acts as the primary identity provider for all SSO processes, so to create a new user
+           we will simply create a new record in this database.
+           </p>
+
+           <h5>Populate Camp Access Database</h5>
+           <p>
+           In this application, users are only allowed to see sensitive data for the camps that they have been provided access to. 
+           What camps a user has access to is stored in a table called "app_campaccess" within the Ski Manager Database.
+           </p>
+
+           <h5>Configure Yellowfin Access Filters</h5>
+           <p>The table populated in the previous step will be referenced by Yellowfin's access filter functionality. 
+           Within Yellowfin, we have setup the access filters to refresh based on a full query of this table.
+           </p>
+           {% load static %} 
+           <img id="accessFilterImg" src="{% static "app/images/yfaccessfilters.png" %}"/>
+           <p>Because we have selected "New User Auto Refresh", this query will be run as soon as we create the Yellowfin user in the following step, 
+           ensuring that the security measures are in place before the user ever enters the application.
+           </p>
+
+           <h5>Create Yellowfin User</h5>
+           <p>Once the access filter setup has been configured, we are ready to create the Yellowfin user. This is done using the Yellowfin Administrative web-service call "ADDUSER".
+           In order to ensure proper access to functionality within the application, 
+           we will assign this user a Yellowfin User Role corresponding with thier role within the Ski Manager Appliation</p>
+
+
+<pre class="prettyprint"><xmp>def create_user(self, username, role):
+    #Map Ski Manager user roles to Yellowfin user roles. 
+    roles={
+        'CONSUMER': 'YFREPORTCONSUMER',
+        'ADMIN': 'YFADMIN'}
+    #User to be created
+    person = {
+        'userId': username,
+        'emailAddress': username,
+        #As the primary SSO entry will be performed elsewhere,
+        #all entry into the Yellowfin application will be controled with the "LOGINUSERNOPASSWORD" call. 
+        #Since the user will not need their password to get into the application, we can generate a random password.
+        'password': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)),
+        'firstName': username.split("@")[0],
+        'lastName': username.split("@")[1],
+        'roleCode':roles[role]
+    }
+    admin_service_request = {	
+        'loginId': 'admin@yellowfin.com.au',
+        'password': 'test',
+        'orgId': 1,
+
+        #Name of the web-service function to be employed
+        'function': 'ADDUSER',
+
+        'person': person,
+    } 
+    response = self.client.service.remoteAdministrationCall(admin_service_request)</xmp></pre>
+
+
+           <h5>Assign Yellowfin User to Yellowfin User Group</h5>
+           <p>In order to control access to content within Yellowfin, each user is immediately assigned to a user group. 
+           Each user group is allowed access to certain content folders based off of their needs,  limiting what reports, views, and dashboareds they are allowed to interact with.</p>
+<pre class="prettyprint"><xmp>def add_user_to_group(self, username, role):
+    #Map Ski Manager user role to Yellowfin User Group
+    groups = {
+        'ADMIN' : 'Integration Admin Users',
+        'CONSUMER' : 'Integration Read Users'
+    }
+    person = {
+        'userId' : username,
+    }
+    group = {
+        'groupName' : groups[role],
+    }
+    admin_service_request = {	
+        'loginId': 'admin@yellowfin.com.au',
+        'password': 'test',
+        'orgId': 1,
+
+        #Name of the web-service function to be employed
+        'function': 'INCLUDEUSERINGROUP',
+
+        'person': person,
+        'group': group
+    } 
+    response = self.client.service.remoteAdministrationCall(admin_service_request)</xmp></pre>
+
+        </div>
+    </div>
+</form>
+<style>
+    .row {
+        border-radius: 10px;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.25);
+        background: #ffffff;
+        margin-top: 20px;
+    }
+    .browsebtn {
+        background: none;
+        color: #eeeeee;
+    }
+    .col, .col-2, .col-4, .col-8 {
+        border: solid 0px #6c757d;
+        padding: 10px;
+    }
+    p {
+        padding-left:10px;
+    }
+    #accessFilterImg {
+        width: 50%;
+        margin-left: 30px;
+        margin-bottom: 10px;
+    }
+    .formcol {
+        padding-left: 10%;
+    }
+</style>
+{% endblock %}

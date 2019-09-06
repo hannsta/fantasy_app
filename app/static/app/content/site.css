@@ -1,0 +1,120 @@
+body {
+    padding-bottom: 20px;
+    background-color: #efefef;
+}
+@font-face {
+    font-family: 'Avenir Next Condensed';
+    src: url('http://yellowfinintegrationdemo.com/static/apps/fonts/AvenirNextCondensed-Regular.ttf');
+}
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+.navbar-light .navbar-nav .nav-link {
+    color: #efefef;
+}
+    /* styles for validation helpers */
+.field-validation-error {
+    color: #b94a48;
+}
+.w1 {
+    width: 10%;
+}
+
+.w3 {
+    width: 30%;
+}
+
+.w7 {
+    width: 70%;
+    text-align: right;
+}
+.field-validation-valid {
+    display: none;
+}
+.yfTooltip {
+    display: block;
+    font-size: 12px !important;
+    font-family: Helvetica, Sans-Serif !important;
+    background: #ffffff !important;
+    border-radius: 5px;
+}
+input.input-validation-error {
+    border: 1px solid #b94a48;
+}
+h6 {
+    color: #009eec;
+    margin-bottom: 15px;
+}
+h5{
+    font-weight: bold;
+    padding-left: 5px;
+}
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #b94a48;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+.navbar{
+    margin-bottom: 0px;
+}
+
+.nav-link{
+    font-size: 18px;
+}
+pre.prettyprint {
+    margin-left: 25px;
+    margin-right: 25px;
+    background-color: #f6f8fa !important;
+    border-radius: 10px;
+    border: 1px solid #f6f8fa !important;
+}
+
+xmp {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.com {
+    color: cornflowerblue !important;
+}
+#id_camps {
+    height: 200px;
+}
+.col.modalcol {
+    display: table-cell;
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.modalhead {
+    font-size: 16px;
+}
+
+.row.minimodal {
+    display: flex;
+    overflow: hidden;
+    background-color: #666666;
+    color: #eeeeee;
+    margin-bottom: 5px;
+    margin-top: 0px;
+    margin-right: -15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.05);
+}

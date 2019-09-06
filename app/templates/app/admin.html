@@ -1,0 +1,36 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+</div>
+<div class="container framecontainer">
+    <div class="col">
+       <h5></h5>
+    </div>
+   <div class="col">
+        <div class="row toprow">
+            <h4>Iframe - Campaign Analysis</h4>
+        </div>
+        <div class="row">
+        </div>
+    </div>
+    <iframe class="adminFrame" src="http://10.100.1.159:8080/logon.i4?LoginWebserviceId={{token}}"></iframe>
+</div>
+
+<style>
+    .framecontainer {
+        width: 1200px;
+    }
+    .adminFrame {
+        border: 1px solid #e4e4e4;
+        overflow:no-display;
+        width: 1400px;
+        height: 1000px;
+    }
+    .row {
+        margin-bottom:20px;
+    }
+    .toprow {
+        margin-top: 15px;
+    }
+</style>
+{% endblock %}

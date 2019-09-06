@@ -1,0 +1,94 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<script src="http://52.89.95.143:7474/JsAPI" type="text/javascript"></script>
+<h2>My Dashboard</h2>
+<h6>{{user.email}}</h6>
+
+<div class="container" id="dashboardmain">
+    <div class="row" id="campaign_div" style="display:none;">
+        <div class="col"> 
+                <div class="row">
+                    <div class="col">
+                        <div id="campaign_dashboard">
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="col">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    #sales_select, #campaign_select {
+        border-top: 1px solid #ebebeb;
+        border-left: 1px solid #ebebeb;
+        border-right: 1px solid #ebebeb;
+    }
+    .botborder {
+        border-bottom: 1px solid #ebebeb;
+    }
+    h1 {
+        margin-bottom: 30px;
+    }
+    .row {
+        margin-bottom:25px;
+    }
+    #yellowfin_report {
+        width: 960px;
+    }
+    .yfReportFooter, .yfDashTitleOuter {
+        display: none;
+    }
+    .dashtab {
+        color: #333740;
+    }
+    .bar {
+        background-color: #ffd71f !important;
+    }
+    p.label {
+       margin-bottom: 5px;
+    }
+    .yfDash {
+        overflow: hidden !important;
+    }
+    .reportSection {
+        padding-left:5px;
+    }
+    .yfReport {
+        width: 100% !important;
+        overflow: hidden !important;
+    }
+    .yfDashReport {
+        border: 2px solid #ebebeb;
+        padding: 5px;
+    }
+    .multiWidgetCanvasEditor, .canvasArea {
+        margin: auto;
+    }
+    .multiselect-container {
+        width:300px;
+    }
+    .multiselect-container > li {
+        margin-left:10px;
+    }
+    .multiselect {
+        background-color:#ffffff;
+        border: 1px solid #aaaaaa;
+    }
+
+</style>
+{% endblock %}
+{% block scripts %}
+<script src="{{STATIC_URL}}/static/app/scripts/reports.js"></script>
+<script>
+    loadDashboards('{{token}}');
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.min.js"></script>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<div class="row">
+    <h5>Login to Ski Manager</h5>
+</div>
+<form action="/login" method="post">
+	{% csrf_token %}
+    <div class="row">
+		<div class="col">
+            <div class="form-group">
+                <label for="inputEmail1">Email</label>
+                {{form.email}}
+			</div>
+			<div class="form-group">
+				<label for="inputPassword">Password</label>
+                {{form.password}}
+			</div>
+            <div class="form-group">
+				<button type="submit" class="btn btn-primary">Submit</button>
+			</div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            {{ form.errors }}
+            {{ form.non_field_errors }}
+        </div>
+    </div>
+</form>
+<style>
+    .row {
+        margin-top:15px;
+    }
+</style>
+{% endblock %}

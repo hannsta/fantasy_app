@@ -1,0 +1,49 @@
+<script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<div id="like_button_container"></div>
+<div id="contacts_list"></div>
+
+<script type="text/babel">
+'use strict';
+
+const e = React.createElement;
+
+class App extends React.Component {
+  state = {
+    players: []
+  }  
+  componentDidMount() {
+    fetch('https://api.fantasy.nfl.com/v1/players/stats?statType=seasonStats&season=2018&week=1&format=json')
+    .then(res => res.json())
+    .then((data) => {
+      this.setState({ players: data['players'] })
+    })
+    .catch(console.log)
+  }
+  render() {
+        return (
+          <Players players={this.state.players} />
+        )
+  }
+}
+function Players(props) {
+  console.log(props);
+  return (
+    <div>
+      <center><h1>Contact List</h1></center>
+      {props.players.map((player) => (
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">{player.name}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">{player.position}</h6>
+            <p class="card-text">{player.teamAbbr}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+ReactDOM.render(e(App), document.querySelector('#contacts_list'));
+</script>
