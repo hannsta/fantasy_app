@@ -5,8 +5,12 @@ import string
 class YellowfinAdminService(object):
 
     url = settings.YELLOWFIN_URL+'/services/AdministrationService?wsdl'
-    client = Client(url)
-
+    client = None
+    def __init__(self): 
+        try:
+            self.client = Client(self.url)
+        except:
+            print("could not connect to Yellowfin")
     def login_user(self, username, entry):
 
         #User to be logged in

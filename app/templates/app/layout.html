@@ -19,41 +19,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #1b2b6b; color: #efefef">
       <a class="navbar-brand" href="/"><img src="{% static "app/images/mountain_white.png" %}" width="130" height="40"/></a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-           {% if user.is_authenticated %}
-
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'dashboard' %}">My Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'user_portal' %}">My Reports</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'admin' %}"> IFrame</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Custom Analytics
-            </a>
-            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="{% url 'dash_entry' %}"> Campaign Dashboard</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item"  href="{% url 'browse_entry' %}"> Browse</a>
-              <a class="dropdown-item" href="{% url 'new_report_entry' %}"> New Report</a>
-            </div>
-          </li>
-          {% endif %}
-        </ul>
-
-
        {% include 'app/loginpartial.html' %}
-
-    </div>
     </nav>
     <div class="container body-content">
 {% block content %}{% endblock %}

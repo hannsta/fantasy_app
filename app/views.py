@@ -279,12 +279,13 @@ def removePlayer(request):
     player_id = request.GET.get('player_id')
     email = request.user.email
     UserTeamPlayer.objects.filter(user_id = email, player_id = player_id).delete()
-    response = HttpResponse(content, content_type='text/plain')
+    response = HttpResponse("Success", content_type='text/plain')
     return response
 
 def getPlayers(request):
     email = request.user.email
-    players = UserTeamPlayer.objects.filter(user_id = email).values('player_id','name','position','team')
+    player_ids = UserTeamPlayer.objects.filter(user_id = email).values('player_id')
+    players = Player.objects.filter(season=2019,player_id__in=player_ids).values('player_id','name','position','team')
     data = json.dumps(list(players))
     return HttpResponse(data, content_type='application/json')
 

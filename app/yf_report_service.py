@@ -5,8 +5,12 @@ from django.conf import settings
 class YellowfinReportService(object):
 
     url =  settings.YELLOWFIN_URL+'/services/ReportService?wsdl' 
-    client = Client(url)
-
+    client = None
+    def __init__(self): 
+        try:
+            self.client = Client(self.url)
+        except:
+            print("could not connect to Yellowfin")
     def get_report_file(self, username, reqname, report):
         #Yellowfin webserivce request
         report_service_request = {	

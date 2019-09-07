@@ -1,3 +1,7 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
 <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
 <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
@@ -14,10 +18,10 @@ class App extends React.Component {
     players: []
   }  
   componentDidMount() {
-    fetch('https://api.fantasy.nfl.com/v1/players/stats?statType=seasonStats&season=2018&week=1&format=json')
+    fetch('/getPlayers')
     .then(res => res.json())
     .then((data) => {
-      this.setState({ players: data['players'] })
+      this.setState({ players: data })
     })
     .catch(console.log)
   }
@@ -31,13 +35,12 @@ function Players(props) {
   console.log(props);
   return (
     <div>
-      <center><h1>Contact List</h1></center>
       {props.players.map((player) => (
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">{player.name}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{player.position}</h6>
-            <p class="card-text">{player.teamAbbr}</p>
+            <p class="card-text">{player.team}</p>
           </div>
         </div>
       ))}
@@ -47,3 +50,5 @@ function Players(props) {
 
 ReactDOM.render(e(App), document.querySelector('#contacts_list'));
 </script>
+
+{% endblock %}
