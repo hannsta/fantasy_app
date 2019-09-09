@@ -3,6 +3,7 @@ Definition of views.
 """
 import urllib3
 import json
+from django.db import transaction
 from django.shortcuts import render
 from django.http import HttpRequest
 from django.http import HttpResponseRedirect
@@ -30,56 +31,6 @@ NFLFantasyService = nfl_fantasy_service.NFLFantasyService()
 yellowfin_url = settings.YELLOWFIN_URL+'/logon.i4?LoginWebserviceId='
 http = urllib3.PoolManager()
 
-#Yellowfin related views
-
-
-#SSO entry to browse page
-@login_required(login_url='/login')
-def browse_entry(request):
-    assert isinstance(request, HttpRequest)
-    token = AdminService.login_user(request.user.email,'BROWSE')
-    return HttpResponseRedirect(yellowfin_url+token)
-
-#SSO entry to the new report creation screen.
-@login_required(login_url='/login')
-def new_report_entry(request):
-    assert isinstance(request, HttpRequest)
-    token = AdminService.login_user(request.user.email,'NEW_REPORT')
-    return HttpResponseRedirect(yellowfin_url+token)
-
-#SSO entry to the new report creation screen.
-@login_required(login_url='/login')
-def dash_entry(request):
-    assert isinstance(request, HttpRequest)
-    token = AdminService.login_user(request.user.email,'DASHBOARD')
-    return HttpResponseRedirect(yellowfin_url+token)
-
-#SOAP reporting web service - get report as a file
-@login_required(login_url='/login')
-def get_report(request):
-
-    file_type = request.POST['file_type']
-    report = request.POST['report_name']
-    file_data = ReportService.get_report_file(request.user.email, file_type, report)
-    resp = HttpResponse(file_data, content_type='application/'+file_type.lower()+';charset=UTF-8')
-    resp['Content-Disposition'] = "attachment; filename=%s" % report+"."+file_type.lower()
-    return resp
-
-
-#JS API SSO call for dashboard page (dash.html)
-@login_required(login_url='/login')
-def dashboard(request):
-    assert isinstance(request, HttpRequest)
-    token = AdminService.login_user(request.user.email, 'JS_API')
-    return render(
-        request,
-        'app/dash.html',
-        {
-            'title':'Dashboard',
-            'token': token,
-            'year':datetime.now().year,
-        }
-    )
 
 
 #Other views
@@ -90,6 +41,7 @@ def home(request):
         request,
         'app/index.html',
         {
+            'form': BootstrapAuthenticationForm,
             'title':'Home Page',
             'year':datetime.now().year,
         }
@@ -142,13 +94,12 @@ def login(request):
             if user.is_active:
                 request.session.set_expiry(86400) #sets the exp. value of the session 
                 auth_login(request, user) #the user is now logged in
-                token = AdminService.login_user(request.user.email,'JS_API')
                 return render(
                     request,
-                    'app/dash.html',
+                    'app/index.html',
                     {
+                        'form': BootstrapAuthenticationForm,
                         'title':'About',
-                        'token': token,
                         'year':datetime.now().year,
                     }
                 )
@@ -252,6 +203,15 @@ def detail(request, acme_data):
 def yfRedirect(request):
     return HttpResponseRedirect(yellowfin_url)
 
+def getLoginStatus(request):
+    if request.user.is_authenticated:
+        return HttpResponse(status=200)
+    return HttpResponse(status=403)
+
+def getMyTeamEntry(request):
+    token = json.dumps(AdminService.login_user(request.user.email,'PLAYERSUMMARY'))
+    return HttpResponse(token, content_type='application/json')
+
 def getWeekData(request):
     season = 2018
     for season in range(2018, 2020):
@@ -272,18 +232,24 @@ def addPlayer(request):
     email = request.user.email
     user_player = UserTeamPlayer(user_id = email, player_id = player_id)
     user_player.save()
-    response = HttpResponse("Success", content_type='text/plain')
-    return response
+    UserTeamPlayer.objects.update()
+    player_ids = UserTeamPlayer.objects.filter(user_id = email).values('player_id')
+    players = Player.objects.filter(season=2019,player_id__in=player_ids).values('player_id','name','position','team')
+    data = json.dumps(list(players))
+    return HttpResponse(data, content_type='application/json')
 
 def removePlayer(request):
     player_id = request.GET.get('player_id')
     email = request.user.email
     UserTeamPlayer.objects.filter(user_id = email, player_id = player_id).delete()
-    response = HttpResponse("Success", content_type='text/plain')
-    return response
+    player_ids = UserTeamPlayer.objects.filter(user_id = email).values('player_id')
+    players = Player.objects.filter(season=2019,player_id__in=player_ids).values('player_id','name','position','team')
+    data = json.dumps(list(players))
+    return HttpResponse(data, content_type='application/json')
 
 def getPlayers(request):
     email = request.user.email
+    UserTeamPlayer.objects.update()
     player_ids = UserTeamPlayer.objects.filter(user_id = email).values('player_id')
     players = Player.objects.filter(season=2019,player_id__in=player_ids).values('player_id','name','position','team')
     data = json.dumps(list(players))

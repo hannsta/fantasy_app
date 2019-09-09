@@ -17,6 +17,8 @@ class Player(models.Model):
     name = models.CharField(max_length=100)
     position = models.CharField(max_length=100)
     team = models.CharField(max_length=100)
+    week_points = models.IntegerField()
+    week_points_proj = models.IntegerField()
     player_stat_id = models.IntegerField()
     season = models.IntegerField()
     week = models.IntegerField()
@@ -25,7 +27,7 @@ class Player(models.Model):
 class PlayerStat(models.Model):
     player_stat_id = models.IntegerField()
     stat_id = models.IntegerField()
-    points = models.DecimalField(decimal_places=3,max_digits=10)
+    value = models.DecimalField(decimal_places=3,max_digits=10)
 
 class StatDefinition(models.Model):
     stat_id = models.IntegerField()

@@ -2,9 +2,30 @@
 
 {% block content %}
 
-<div class="jumbotron">
-    <h1>Ski Camp Manager</h1>
-    <p class="lead">A Demonstration of Yellowfin Integration</p>
-</div>
+<form action="/login" method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label for="inputEmail1">Email</label>
+                {{form.email}}
+            </div>
+            <div class="form-group">
+                <label for="inputPassword">Password</label>
+                {{form.password}}
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            {{ form.errors }}
+            {{ form.non_field_errors }}
+        </div>
+    </div>
+</form>
 
 {% endblock %}

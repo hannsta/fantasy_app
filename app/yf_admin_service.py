@@ -15,7 +15,7 @@ class YellowfinAdminService(object):
 
         #User to be logged in
         person = {
-            'userId': username,
+            'userId': 'admin@yellowfin.com.au',
         }
 
         #Conrtol what the user sees when they login
@@ -25,7 +25,7 @@ class YellowfinAdminService(object):
             'JS_API' : [],
             'ADMIN' : ['ENTRY=ADMINISTRATION','YFTOOLBAR=FALSE','HIDEHEADER=TRUE','YFTOOLBAR=FALSE'],
             'DASHBOARD' : ['ENTRY=VIEWDASHBOARD','DASHBOARDUUID=1e68d9cc-fa5a-44e2-816d-782aa40ceeae', 'YFTOOLBAR=FALSE'],
-            'DASH_IFRAME' : ['ENTRY=VIEWDASHBOARD','DASHBOARDUUID=1e68d9cc-fa5a-44e2-816d-782aa40ceeae','HIDEHEADER=TRUE','YFTOOLBAR=FALSE']
+            'PLAYERSUMMARY' : ['ENTRY=VIEWREPORT','REPORTUUID=431ca0c1-514a-403b-b44f-281f14485359','HIDEHEADER=TRUE','YFTOOLBAR=FALSE']
         }
 
         #Yellowfin webserivce request

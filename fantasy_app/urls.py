@@ -22,14 +22,9 @@ urlpatterns = [
     # Examples:
     url(r'^$', app.views.home, name='home'),
     url(r'^admin', app.views.admin, name='admin'),
-    url(r'^browse_entry', app.views.browse_entry, name='browse_entry'),
-    url(r'^new_report_entry', app.views.new_report_entry, name='new_report_entry'),
-    url(r'^dash_entry', app.views.dash_entry, name='dash_entry'),
     url(r'^user_portal', app.views.user_portal, name='user_portal'),
-    url(r'^get_report', app.views.get_report, name='get_report'),
     url(r'^add_user', app.views.add_user, name='add_user'),
     url(r'^login$', app.views.login, name='login'),
-    url(r'^dashboard', app.views.dashboard, name='dashboard'),
     url(r'^JsAPI$', app.views.js_call, name='JsAPI'),
     url(r'^admin', app.views.admin, name='admin'),
     url(r'^logout$', app.views.logout, name='logout'),
@@ -42,6 +37,8 @@ urlpatterns = [
     url(r'^getStatDefinitions$', app.views.getStatDefinitions, name='getStatDefinitions'),
 
     #Fantasy REST Endpoints
+    url(r'^getMyTeamEntry$', app.views.getMyTeamEntry, name='getMyTeamEntry'), 
+    url(r'^getLoginStatus$', app.views.getLoginStatus, name='getLoginStatus'), 
     url(r'^addPlayer$', app.views.addPlayer, name='addPlayer'),  
     url(r'^removePlayer$', app.views.removePlayer, name='removePlayer'), 
     url(r'^getPlayers$', app.views.getPlayers, name='getPlayers'),  

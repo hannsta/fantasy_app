@@ -35,6 +35,8 @@ class NFLFantasyService(object):
                                 name = player['name'],
                                 position = player['position'],
                                 team = player['teamAbbr'], 
+                                week_points = player['weekPts'],
+                                week_points_proj = player['weekProjectedPts'],
                                 week = week, 
                                 season = season,
                                 player_stat_id =  player_stat_id)
@@ -42,7 +44,7 @@ class NFLFantasyService(object):
             for stat_id, stat_value in player['stats'].items():
                 stat_row = PlayerStat(player_stat_id = player_stat_id, 
                                     stat_id = stat_id,
-                                    points = stat_value)
+                                    value = stat_value)
                 stat_data.append(stat_row)
             player_stat_id+=1
         Player.objects.bulk_create(player_data)
