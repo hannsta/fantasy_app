@@ -509,9 +509,10 @@ var PlayerSearch = function (_React$Component6) {
 
 function getCookie(name) {
   var cookieValue = null;
+  console.log("here");
+
   if (document.cookie && document.cookie !== '') {
     var cookies = document.cookie.split(';');
-    console.log("here");
     console.log(cookies);
     for (var i = 0; i < cookies.length; i++) {
       var cookie = jQuery.trim(cookies[i]);
