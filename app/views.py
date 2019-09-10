@@ -135,7 +135,7 @@ def add_user(request):
             email= form.cleaned_data.get('email')
             role = form.cleaned_data.get('role')
             pw=form.cleaned_data.get('password')
-            camps=form.cleaned_data.get('camps')
+            
         else:
             #If form not valid, return form with errors
             return render(
@@ -154,9 +154,6 @@ def add_user(request):
         user.save()
 
         #Add access filter values to table. With "refresh on new user" enabled in the access fitler, this will automatically update when the user is creatd
-        for camp in camps:
-            al = CampAccess(email=request.POST['email'], camp=camp)
-            al.save()
 
         #Create Yellowfin User. 
         AdminService.create_user(user.email,user.role)
