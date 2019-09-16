@@ -15,7 +15,7 @@ class YellowfinAdminService(object):
 
         #User to be logged in
         person = {
-            'userId': 'admin@yellowfin.com.au',
+            'userId': username,
         }
 
         #Conrtol what the user sees when they login
@@ -25,7 +25,7 @@ class YellowfinAdminService(object):
             'JS_API' : [],
             'ADMIN' : ['ENTRY=ADMINISTRATION','YFTOOLBAR=FALSE','HIDEHEADER=TRUE','YFTOOLBAR=FALSE'],
             'DASHBOARD' : ['ENTRY=VIEWDASHBOARD','DASHBOARDUUID=1e68d9cc-fa5a-44e2-816d-782aa40ceeae', 'YFTOOLBAR=FALSE'],
-            'PLAYERSUMMARY' : ['ENTRY=VIEWREPORT','REPORTUUID=431ca0c1-514a-403b-b44f-281f14485359','HIDEHEADER=TRUE','YFTOOLBAR=FALSE']
+            'PLAYER_SUMMARY' : ['ENTRY=VIEWREPORT','REPORTUUID=2e830a7b-c47f-45da-8d5d-3c19e09ee60e','HIDEHEADER=TRUE','YFTOOLBAR=FALSE']
         }
 
         #Yellowfin webserivce request
@@ -41,7 +41,7 @@ class YellowfinAdminService(object):
 
             #Call specific components
             'person': person,
-            'orgRef': '%',
+            'orgRef': username,
             'parameters' : entry_parameters[entry]
         }
 
@@ -61,7 +61,8 @@ class YellowfinAdminService(object):
             'password': ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8)),
             'firstName': username.split("@")[0],
             'lastName': username.split("@")[1],
-            'roleCode':roles[role]
+            'roleCode':roles[role],
+            'orgRef': username
         }
         admin_service_request = {	
             'loginId': 'admin@yellowfin.com.au',
@@ -72,7 +73,21 @@ class YellowfinAdminService(object):
 
             'person': person,
         } 
-        response = self.client.service.remoteAdministrationCall(admin_service_request)        
+        response = self.client.service.remoteAdministrationCall(admin_service_request)      
+    def add_org(self, username):
+        client = {
+            'clientReferenceId': username,
+            'clientName': username,
+            'defaultOrg': 'false'
+            }
+        admin_service_request = {	
+            'loginId': 'admin@yellowfin.com.au',
+            'password': 'test',
+            'orgId': 1,
+            'function': 'CREATECLIENT',
+            'client': client,
+        } 
+        response = self.client.service.remoteAdministrationCall(admin_service_request)    
     def add_user_to_group(self, username, role):
         groups = {
             'ADMIN' : 'Integration Admin Users',

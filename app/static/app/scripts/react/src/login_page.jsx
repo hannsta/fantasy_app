@@ -3,6 +3,7 @@
 
 const e = React.createElement;
 var csrftoken = getCookie('csrftoken');
+var YF_BASE_URL = 'http://34.220.213.20:8080'
 
 const CSRFToken = () => {
     return (
@@ -23,20 +24,48 @@ class App extends React.Component {
 
   switchTabs(content){
     if (content == "my_team_report"){
-      fetch('/getMyTeamEntry')
-      .then(res => res.json())
-      .then((data) => {
-        this.setState({ 
-          token: data,
-          contentTab: content
-         })
-      })
-      .catch(console.log)
-    }else{
-      this.setState({
-        contentTab: content
-      })
-     }
+      if (this.state.token==null){
+        fetch('/yfLogin?entry=PLAYER_SUMMARY')
+        .then(res => res.json())
+        .then((data) => {
+          this.setState({ 
+            token: data,
+            contentTab: content
+          })
+        })
+        .catch(console.log)
+      }
+    }
+    if (content == "new_report"){
+      if (this.state.token==null){
+        fetch('/yfLogin?entry=NEW_REPORT')
+        .then(res => res.json())
+        .then((data) => {
+          this.setState({ 
+            token: data,
+            contentTab: content
+          })
+        })
+        .catch(console.log)
+      }
+    }
+    if (content == "browse"){
+      if (this.state.token==null){
+        fetch('/yfLogin?entry=BROWSE')
+        .then(res => res.json())
+        .then((data) => {
+          this.setState({ 
+            token: data,
+            contentTab: content
+          })
+        })
+        .catch(console.log)
+      }
+    }
+    this.setState({
+      contentTab: content
+    })
+     
   }
   componentDidMount() {
     fetch('/getLoginStatus')
@@ -54,10 +83,8 @@ class App extends React.Component {
   render() {
     return (
       <div class="row">
-        <nav className="col-md-2 d-none d-md-block bg-light sidebar">
-          <LeftNavContainer switchTabs={this.switchTabs} loggedIn={this.state.loggedIn} />
-        </nav>
-        <main className="col-md-9 ml-sm-auto col-lg-10 px-4">
+        <LeftNavContainer switchTabs={this.switchTabs} loggedIn={this.state.loggedIn} />
+        <main className="col-main">
           <ContentContainer loggedIn={this.state.loggedIn} token={this.state.token} contentTab={this.state.contentTab}/>
         </main>
       </div>
@@ -100,40 +127,55 @@ class ContentContainer extends React.Component{
   render(){
     const contentTab = this.props.contentTab;
     const isLoggedIn =  this.props.loggedIn;
+    var url = null;
     if (isLoggedIn){
+      var yfsession = getCookie('JSESSIONID');
       if (contentTab == "my_team"){
-      return (
-        <div class="container">
-        <div class="row">
-        <h2>Team Manager</h2>
-        </div>
-        <div class="row">
-        <h5>Build your Team!</h5>
-        </div>
+        return (
+          <div class="container">
+          <div class="row">
+          <h2>Team Manager</h2>
+          </div>
+          <div class="row">
+          <h5>Build your Team!</h5>
+          </div>
 
-        <div class="row player-search">
-        <PlayerSearch addPlayer = {this.addPlayer}/>
-        </div>
-        <div class="row player-list">
+          <div class="row player-search">
+          <PlayerSearch addPlayer = {this.addPlayer}/>
+          </div>
+          <div class="row player-list">
 
-        <h5>Your Team</h5>
-        <Players players={this.state.players} removePlayer = {this.removePlayer}/>
-        </div>
-        </div>
-      )
-      }
-      if (contentTab == "my_team_report"){
-        if (this.props.token==null){
-          return(<div></div>)
-        }else{
-          const url = "http://localhost:8080/logon.i4?LoginWebserviceId="+this.props.token
-          return(<iframe width="1000px" height="1200px" src={url}></iframe>)
-
+          <h5>Your Team</h5>
+          <Players players={this.state.players} removePlayer = {this.removePlayer}/>
+          </div>
+          </div>
+        )
+      }else{
+        if (yfsession==null){
+          if (this.props.token==null){
+            return(<div>Oops Couldnt Log into Yellowfin</div>)
+          }
+          url = YF_BASE_URL+"/logon.i4?LoginWebserviceId="+this.props.token
         }
       }
+      if (contentTab == "my_team_report"){
+          url = YF_BASE_URL+"/RunReport.i4?reportUUID=2e830a7b-c47f-45da-8d5d-3c19e09ee60e&primaryOrg=1&clientOrg=1"
+      }
+      if (contentTab == "new_report"){
+          url = YF_BASE_URL+"/MIPreReportInit.i4"
+      }
+      if (contentTab == "browse"){
+          url = YF_BASE_URL+"/MIPreReports.i4"
+      }
+
+      if (url!=null){
+        return(<iframe width="100%" height="1200px" src={url}></iframe>)
+      }
+      return(<div>Page does not exist</div>)
+
     }
     else {
-      return <div>Welcome, login to get started!</div>
+      return <div id="register-page"><h6>Create a New Account</h6><RegisterPage /></div>
     }
   }
 
@@ -144,9 +186,17 @@ function LeftNavContainer(props) {
     return <div></div>
   }
   if (isLoggedIn){
-    return <LeftNav switchTabs = {props.switchTabs}/>
+    return(
+      <nav className="col-left d-none d-md-block sidebar">
+        <LeftNav switchTabs = {props.switchTabs}/>
+      </nav>
+    )
   }
-  return <LoginPage/>
+  return (
+    <nav className="col-left-login d-none d-md-block sidebar">
+      <LoginPage/>
+    </nav>
+  )
 };
 
 class LeftNav extends React.Component{
@@ -154,10 +204,28 @@ class LeftNav extends React.Component{
     return (
       <div>
         <div class="row">
-          <button onClick={(e) => this.props.switchTabs("my_team")}>My Team</button>
+          <div id="opt_select" onClick={(e) => this.props.switchTabs("my_team")}> 
+            <img src="/static/app/images/team.svg" width="40px" height="40px"></img>
+            <p>My Team</p>
+            </div>
         </div>
         <div class="row">
-          <button onClick={(e) => this.props.switchTabs("my_team_report")}>My Report</button>
+          <div id="opt_select" onClick={(e) => this.props.switchTabs("my_team_report")}>
+            <img src="/static/app/images/statistics.svg" width="40px" height="40px"></img>
+            <p>Overview</p>
+          </div>
+        </div>
+        <div class="row">
+          <div id="opt_select" onClick={(e) => this.props.switchTabs("new_report")}>
+            <img src="/static/app/images/new-page.svg" width="40px" height="40px"></img>
+            <p>New Report</p>
+          </div>
+        </div>
+        <div class="row">
+          <div id="opt_select" onClick={(e) => this.props.switchTabs("browse")}>
+            <img src="/static/app/images/search.svg" width="40px" height="40px"></img>
+            <p>Browse</p>
+          </div>
         </div>
       </div>
     );
@@ -171,7 +239,20 @@ class LoginPage extends React.Component{
         <CSRFToken />
         <input type="text" name="email" className="form-control" placeholder="Email" maxlength="254" required="" id="id_email"></input>
         <input type="password" name="password" className="form-control" placeholder="Password" required="" id="id_password"></input>
-        <button type="submit">Send</button>
+        <button type="submit">Login</button>
+      </form>
+    );
+  }
+
+}
+class RegisterPage extends React.Component{
+  render(){
+    return (
+      <form action="/add_user" method="post">
+        <CSRFToken />
+        <input type="text" name="email" className="form-control" placeholder="Email" maxlength="254" required="" id="id_email"></input>
+        <input type="password" name="password" className="form-control" placeholder="Password" required="" id="id_password"></input>
+        <button type="submit">Register</button>
       </form>
     );
   }
@@ -180,13 +261,14 @@ class LoginPage extends React.Component{
 
 class Players extends React.Component {
   render() {
-    console.log(this)
      return (
       <div id="player-card" className="container">
         {this.props.players.map((player) => (
           <div className="row player-row">
+              <div className="col-6">
+                <p>{player.name}</p>
+              </div>
               <div className="col">
-                <h6>{player.name}</h6>
                 <p class="card-text">{player.position}  {player.team}</p>
               </div>
               <div className="col button-col">
@@ -247,7 +329,6 @@ class PlayerSearch extends React.Component {
   }
   
   renderSuggestion(suggestion) {
-    console.log(suggestion)
     return (
       <span>{suggestion}</span>
     );

@@ -133,18 +133,12 @@ def add_user(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             email= form.cleaned_data.get('email')
-            role = form.cleaned_data.get('role')
+            role = 'MANAGER'
             pw=form.cleaned_data.get('password')
             
         else:
-            #If form not valid, return form with errors
-            return render(
-                request,
-                'app/new_user.html',
-                {
-                    'title':'Add User',
-                    'form': form,
-                })
+            return HttpResponse(status=500)
+
 
         #Create Ski Manager user.
         user=User()
@@ -153,22 +147,11 @@ def add_user(request):
         user.role = role
         user.save()
 
-        #Add access filter values to table. With "refresh on new user" enabled in the access fitler, this will automatically update when the user is creatd
-
-        #Create Yellowfin User. 
+        AdminService.add_org(user.email)
         AdminService.create_user(user.email,user.role)
-        #Add User to Yellowfin User Group
-        AdminService.add_user_to_group(user.email,user.role)
 
-        return render(
-                    request,
-                    'app/login.html',
-                    {
-                        'form': BootstrapAuthenticationForm,
-                        'title':'Login',
-                        'year':datetime.now().year,
-                    }
-            )     
+    return HttpResponse(status=200)
+
 
 
 @login_required(login_url='/login')
@@ -200,13 +183,21 @@ def detail(request, acme_data):
 def yfRedirect(request):
     return HttpResponseRedirect(yellowfin_url)
 
+def yfLogin(request):
+    entry = request.GET.get('entry')
+    token = json.dumps(AdminService.login_user(request.user.email,entry))
+    return HttpResponse(token, content_type='application/json')
+
 def getLoginStatus(request):
     if request.user.is_authenticated:
         return HttpResponse(status=200)
     return HttpResponse(status=403)
 
-def getMyTeamEntry(request):
-    token = json.dumps(AdminService.login_user(request.user.email,'PLAYERSUMMARY'))
+def myTeamEntry(request):
+    token = json.dumps(AdminService.login_user(request.user.email,'PLAYER_SUMMARY'))
+    return HttpResponse(token, content_type='application/json')
+def newReportEntry(request):
+    token = json.dumps(AdminService.login_user(request.user.email,'NEW_REPORT'))
     return HttpResponse(token, content_type='application/json')
 
 def getWeekData(request):
@@ -215,6 +206,13 @@ def getWeekData(request):
         for week in range(1,18):   
             print(str(week)+", "+str(season))
             success = NFLFantasyService.getWeekStats(season, week)
+    content = "Save Successful"
+    response = HttpResponse(content, content_type='text/plain')
+    return response
+def getCurrentWeekData(request):
+    season = 2019
+    week = 1
+    success = NFLFantasyService.getWeekStats(season, week)
     content = "Save Successful"
     response = HttpResponse(content, content_type='text/plain')
     return response

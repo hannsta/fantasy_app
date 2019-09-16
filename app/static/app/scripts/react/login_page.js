@@ -11,6 +11,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var e = React.createElement;
 var csrftoken = getCookie('csrftoken');
+var YF_BASE_URL = 'http://34.220.213.20:8080';
 
 var CSRFToken = function CSRFToken() {
   return React.createElement('input', { type: 'hidden', name: 'csrfmiddlewaretoken', value: csrftoken });
@@ -39,19 +40,44 @@ var App = function (_React$Component) {
       var _this2 = this;
 
       if (content == "my_team_report") {
-        fetch('/getMyTeamEntry').then(function (res) {
-          return res.json();
-        }).then(function (data) {
-          _this2.setState({
-            token: data,
-            contentTab: content
-          });
-        }).catch(console.log);
-      } else {
-        this.setState({
-          contentTab: content
-        });
+        if (this.state.token == null) {
+          fetch('/yfLogin?entry=PLAYER_SUMMARY').then(function (res) {
+            return res.json();
+          }).then(function (data) {
+            _this2.setState({
+              token: data,
+              contentTab: content
+            });
+          }).catch(console.log);
+        }
       }
+      if (content == "new_report") {
+        if (this.state.token == null) {
+          fetch('/yfLogin?entry=NEW_REPORT').then(function (res) {
+            return res.json();
+          }).then(function (data) {
+            _this2.setState({
+              token: data,
+              contentTab: content
+            });
+          }).catch(console.log);
+        }
+      }
+      if (content == "browse") {
+        if (this.state.token == null) {
+          fetch('/yfLogin?entry=BROWSE').then(function (res) {
+            return res.json();
+          }).then(function (data) {
+            _this2.setState({
+              token: data,
+              contentTab: content
+            });
+          }).catch(console.log);
+        }
+      }
+      this.setState({
+        contentTab: content
+      });
     }
   }, {
     key: 'componentDidMount',
@@ -74,14 +100,10 @@ var App = function (_React$Component) {
       return React.createElement(
         'div',
         { 'class': 'row' },
-        React.createElement(
-          'nav',
-          { className: 'col-md-2 d-none d-md-block bg-light sidebar' },
-          React.createElement(LeftNavContainer, { switchTabs: this.switchTabs, loggedIn: this.state.loggedIn })
-        ),
+        React.createElement(LeftNavContainer, { switchTabs: this.switchTabs, loggedIn: this.state.loggedIn }),
         React.createElement(
           'main',
-          { className: 'col-md-9 ml-sm-auto col-lg-10 px-4' },
+          { className: 'col-main' },
           React.createElement(ContentContainer, { loggedIn: this.state.loggedIn, token: this.state.token, contentTab: this.state.contentTab })
         )
       );
@@ -145,7 +167,9 @@ var ContentContainer = function (_React$Component2) {
     value: function render() {
       var contentTab = this.props.contentTab;
       var isLoggedIn = this.props.loggedIn;
+      var url = null;
       if (isLoggedIn) {
+        var yfsession = getCookie('JSESSIONID');
         if (contentTab == "my_team") {
           return React.createElement(
             'div',
@@ -184,20 +208,46 @@ var ContentContainer = function (_React$Component2) {
               React.createElement(Players, { players: this.state.players, removePlayer: this.removePlayer })
             )
           );
-        }
-        if (contentTab == "my_team_report") {
-          if (this.props.token == null) {
-            return React.createElement('div', null);
-          } else {
-            var url = "http://localhost:8080/logon.i4?LoginWebserviceId=" + this.props.token;
-            return React.createElement('iframe', { width: '1000px', height: '1200px', src: url });
+        } else {
+          if (yfsession == null) {
+            if (this.props.token == null) {
+              return React.createElement(
+                'div',
+                null,
+                'Oops Couldnt Log into Yellowfin'
+              );
+            }
+            url = YF_BASE_URL + "/logon.i4?LoginWebserviceId=" + this.props.token;
           }
         }
-      } else {
+        if (contentTab == "my_team_report") {
+          url = YF_BASE_URL + "/RunReport.i4?reportUUID=2e830a7b-c47f-45da-8d5d-3c19e09ee60e&primaryOrg=1&clientOrg=1";
+        }
+        if (contentTab == "new_report") {
+          url = YF_BASE_URL + "/MIPreReportInit.i4";
+        }
+        if (contentTab == "browse") {
+          url = YF_BASE_URL + "/MIPreReports.i4";
+        }
+
+        if (url != null) {
+          return React.createElement('iframe', { width: '100%', height: '1200px', src: url });
+        }
         return React.createElement(
           'div',
           null,
-          'Welcome, login to get started!'
+          'Page does not exist'
+        );
+      } else {
+        return React.createElement(
+          'div',
+          { id: 'register-page' },
+          React.createElement(
+            'h6',
+            null,
+            'Create a New Account'
+          ),
+          React.createElement(RegisterPage, null)
         );
       }
     }
@@ -212,9 +262,17 @@ function LeftNavContainer(props) {
     return React.createElement('div', null);
   }
   if (isLoggedIn) {
-    return React.createElement(LeftNav, { switchTabs: props.switchTabs });
+    return React.createElement(
+      'nav',
+      { className: 'col-left d-none d-md-block sidebar' },
+      React.createElement(LeftNav, { switchTabs: props.switchTabs })
+    );
   }
-  return React.createElement(LoginPage, null);
+  return React.createElement(
+    'nav',
+    { className: 'col-left-login d-none d-md-block sidebar' },
+    React.createElement(LoginPage, null)
+  );
 };
 
 var LeftNav = function (_React$Component3) {
@@ -238,22 +296,64 @@ var LeftNav = function (_React$Component3) {
           'div',
           { 'class': 'row' },
           React.createElement(
-            'button',
-            { onClick: function onClick(e) {
+            'div',
+            { id: 'opt_select', onClick: function onClick(e) {
                 return _this9.props.switchTabs("my_team");
               } },
-            'My Team'
+            React.createElement('img', { src: '/static/app/images/team.svg', width: '40px', height: '40px' }),
+            React.createElement(
+              'p',
+              null,
+              'My Team'
+            )
           )
         ),
         React.createElement(
           'div',
           { 'class': 'row' },
           React.createElement(
-            'button',
-            { onClick: function onClick(e) {
+            'div',
+            { id: 'opt_select', onClick: function onClick(e) {
                 return _this9.props.switchTabs("my_team_report");
               } },
-            'My Report'
+            React.createElement('img', { src: '/static/app/images/statistics.svg', width: '40px', height: '40px' }),
+            React.createElement(
+              'p',
+              null,
+              'Overview'
+            )
+          )
+        ),
+        React.createElement(
+          'div',
+          { 'class': 'row' },
+          React.createElement(
+            'div',
+            { id: 'opt_select', onClick: function onClick(e) {
+                return _this9.props.switchTabs("new_report");
+              } },
+            React.createElement('img', { src: '/static/app/images/new-page.svg', width: '40px', height: '40px' }),
+            React.createElement(
+              'p',
+              null,
+              'New Report'
+            )
+          )
+        ),
+        React.createElement(
+          'div',
+          { 'class': 'row' },
+          React.createElement(
+            'div',
+            { id: 'opt_select', onClick: function onClick(e) {
+                return _this9.props.switchTabs("browse");
+              } },
+            React.createElement('img', { src: '/static/app/images/search.svg', width: '40px', height: '40px' }),
+            React.createElement(
+              'p',
+              null,
+              'Browse'
+            )
           )
         )
       );
@@ -284,7 +384,7 @@ var LoginPage = function (_React$Component4) {
         React.createElement(
           'button',
           { type: 'submit' },
-          'Send'
+          'Login'
         )
       );
     }
@@ -293,8 +393,38 @@ var LoginPage = function (_React$Component4) {
   return LoginPage;
 }(React.Component);
 
-var Players = function (_React$Component5) {
-  _inherits(Players, _React$Component5);
+var RegisterPage = function (_React$Component5) {
+  _inherits(RegisterPage, _React$Component5);
+
+  function RegisterPage() {
+    _classCallCheck(this, RegisterPage);
+
+    return _possibleConstructorReturn(this, (RegisterPage.__proto__ || Object.getPrototypeOf(RegisterPage)).apply(this, arguments));
+  }
+
+  _createClass(RegisterPage, [{
+    key: 'render',
+    value: function render() {
+      return React.createElement(
+        'form',
+        { action: '/add_user', method: 'post' },
+        React.createElement(CSRFToken, null),
+        React.createElement('input', { type: 'text', name: 'email', className: 'form-control', placeholder: 'Email', maxlength: '254', required: '', id: 'id_email' }),
+        React.createElement('input', { type: 'password', name: 'password', className: 'form-control', placeholder: 'Password', required: '', id: 'id_password' }),
+        React.createElement(
+          'button',
+          { type: 'submit' },
+          'Register'
+        )
+      );
+    }
+  }]);
+
+  return RegisterPage;
+}(React.Component);
+
+var Players = function (_React$Component6) {
+  _inherits(Players, _React$Component6);
 
   function Players() {
     _classCallCheck(this, Players);
@@ -305,9 +435,8 @@ var Players = function (_React$Component5) {
   _createClass(Players, [{
     key: 'render',
     value: function render() {
-      var _this12 = this;
+      var _this13 = this;
 
-      console.log(this);
       return React.createElement(
         'div',
         { id: 'player-card', className: 'container' },
@@ -317,12 +446,16 @@ var Players = function (_React$Component5) {
             { className: 'row player-row' },
             React.createElement(
               'div',
-              { className: 'col' },
+              { className: 'col-6' },
               React.createElement(
-                'h6',
+                'p',
                 null,
                 player.name
-              ),
+              )
+            ),
+            React.createElement(
+              'div',
+              { className: 'col' },
               React.createElement(
                 'p',
                 { 'class': 'card-text' },
@@ -337,7 +470,7 @@ var Players = function (_React$Component5) {
               React.createElement(
                 'button',
                 { id: 'drop-button', onClick: function onClick(e) {
-                    return _this12.props.removePlayer(player.player_id);
+                    return _this13.props.removePlayer(player.player_id);
                   } },
                 'Drop'
               )
@@ -353,82 +486,82 @@ var Players = function (_React$Component5) {
 
 ;
 
-var PlayerSearch = function (_React$Component6) {
-  _inherits(PlayerSearch, _React$Component6);
+var PlayerSearch = function (_React$Component7) {
+  _inherits(PlayerSearch, _React$Component7);
 
   function PlayerSearch() {
     _classCallCheck(this, PlayerSearch);
 
-    var _this13 = _possibleConstructorReturn(this, (PlayerSearch.__proto__ || Object.getPrototypeOf(PlayerSearch)).call(this));
+    var _this14 = _possibleConstructorReturn(this, (PlayerSearch.__proto__ || Object.getPrototypeOf(PlayerSearch)).call(this));
 
-    _this13.onChange = function (event, _ref) {
+    _this14.onChange = function (event, _ref) {
       var newValue = _ref.newValue,
           method = _ref.method;
 
-      _this13.setState({
+      _this14.setState({
         isPlayerSelected: false,
         value: newValue
       });
     };
 
-    _this13.onSuggestionSelected = function (event, _ref2) {
+    _this14.onSuggestionSelected = function (event, _ref2) {
       var suggestion = _ref2.suggestion,
           suggestionValue = _ref2.suggestionValue,
           suggestionIndex = _ref2.suggestionIndex,
           sectionIndex = _ref2.sectionIndex,
           method = _ref2.method;
 
-      var selectedPlayer = _this13.state.players.filter(function (player) {
+      var selectedPlayer = _this14.state.players.filter(function (player) {
         return player.name == suggestion;
       })[0];
-      _this13.setState({
+      _this14.setState({
         isPlayerSelected: true,
         selectedId: selectedPlayer.player_id,
         value: suggestion
       });
     };
 
-    _this13.onSuggestionsFetchRequested = function (_ref3) {
+    _this14.onSuggestionsFetchRequested = function (_ref3) {
       var value = _ref3.value;
 
-      var permittedValues = _this13.getSuggestions(value).map(function (player) {
+      var permittedValues = _this14.getSuggestions(value).map(function (player) {
         return player.name;
       });
-      _this13.setState({
+      _this14.setState({
         suggestions: permittedValues
       });
     };
 
-    _this13.onSuggestionsClearRequested = function () {
-      _this13.setState({
+    _this14.onSuggestionsClearRequested = function () {
+      _this14.setState({
         suggestions: []
       });
     };
 
-    _this13.state = {
+    _this14.state = {
       value: '',
       suggestions: [],
       players: [],
       selectedId: '',
       isPlayerSelected: false
     };
-    _this13.getSuggestions = _this13.getSuggestions.bind(_this13);
-    _this13.getSuggestionValue = _this13.getSuggestionValue.bind(_this13);
-    _this13.renderSuggestion = _this13.renderSuggestion.bind(_this13);
-    _this13.onSuggestionSelected = _this13.onSuggestionSelected.bind(_this13);
+    _this14.getSuggestions = _this14.getSuggestions.bind(_this14);
+    _this14.getSuggestionValue = _this14.getSuggestionValue.bind(_this14);
+    _this14.renderSuggestion = _this14.renderSuggestion.bind(_this14);
+    _this14.onSuggestionSelected = _this14.onSuggestionSelected.bind(_this14);
 
-    return _this13;
+    return _this14;
   }
 
   _createClass(PlayerSearch, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this14 = this;
+      var _this15 = this;
 
       fetch('/getAllPlayers').then(function (res) {
         return res.json();
       }).then(function (data) {
-        _this14.setState({ players: data });
+        _this15.setState({ players: data });
       }).catch(console.log);
     }
   }, {
@@ -454,7 +587,6 @@ var PlayerSearch = function (_React$Component6) {
   }, {
     key: 'renderSuggestion',
     value: function renderSuggestion(suggestion) {
-      console.log(suggestion);
       return React.createElement(
         'span',
         null,
@@ -464,7 +596,7 @@ var PlayerSearch = function (_React$Component6) {
   }, {
     key: 'render',
     value: function render() {
-      var _this15 = this;
+      var _this16 = this;
 
       var _state = this.state,
           value = _state.value,
@@ -495,7 +627,7 @@ var PlayerSearch = function (_React$Component6) {
           React.createElement(
             'button',
             { onClick: function onClick(e) {
-                return _this15.props.addPlayer(selectedId);
+                return _this16.props.addPlayer(selectedId);
               } },
             'Add Player'
           )
